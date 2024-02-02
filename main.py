@@ -26,7 +26,7 @@ def extract_comments_from_diagram(sparx):
         df = sparx.query_for_diagram_comments(d_id)
         story_id = input("Input JIRA Issue ID (e.g., RCD-1. Enter to skip): ")
     
-    sparx.write_dataframe_series_to_html(df["comment"], story_id)   
+    sparx.write_dataframe_to_html_and_jira(df, story_id)   
 
 def main():
     parser = argparse.ArgumentParser(description='Sparx Automation Tool', formatter_class=argparse.RawTextHelpFormatter)

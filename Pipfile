@@ -6,8 +6,8 @@ name = "pypi"
 [packages]
 pandas = "*"
 pywin32 = "*"
-jira = "*"
 bs4 = "*"
+jira = {extras = ["cli"], version = "*"}
 
 [dev-packages]
 ipykernel = "*"
