@@ -37,7 +37,10 @@ class SparxAutomator:
         self.jira = JIRA(self.jira_url, basic_auth=(user_name, api_key))
         
         # Check for successful authentication
-        if self.jira.session is None:
+        try:
+            curr_user = self.jira.current_user()
+            self.log.debug(f"Current user information: {curr_user}")
+        except:
             self.log.error("JIRA authentication failed.")
             print("Failed to authenticate with JIRA!")
             return False
