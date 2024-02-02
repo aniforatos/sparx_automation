@@ -6,8 +6,11 @@ name = "pypi"
 [packages]
 pandas = "*"
 pywin32 = "*"
+jira = "*"
+bs4 = "*"
 
 [dev-packages]
+ipykernel = "*"
 
 [requires]
 python_version = "3.9"

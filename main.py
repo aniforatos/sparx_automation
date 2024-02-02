@@ -14,6 +14,8 @@ logging.basicConfig(filename="sparx_automation.log", filemode="w", format='%(asc
                     level=logging.DEBUG)
 
 def extract_comments_from_diagram(sparx):
+    jira_suc = sparx.authenticate_jira()
+
     d_id = sparx.get_current_diagram_id()
     
     if d_id is None:
@@ -21,7 +23,10 @@ def extract_comments_from_diagram(sparx):
         return
     
     df = sparx.query_for_diagram_comments(d_id)
-    sparx.write_dataframe_series_to_html(df["comment"])   
+    if jira_suc:
+        story_id = input("Input JIRA Issue ID (e.g., RCD-1. Enter to skip): ")
+    
+    sparx.write_dataframe_series_to_html(df["comment"], story_id)   
 
 def main():
     parser = argparse.ArgumentParser(description='Sparx Automation Tool', formatter_class=argparse.RawTextHelpFormatter)
@@ -36,7 +41,7 @@ def main():
     model_path = args.model_path
 
     sparx = SparxAutomator(file_path=model_path)
-
+    
     if args.action == "c":
         logging.info("Extracting comments from the current diagram...")
         extract_comments_from_diagram(sparx)
