@@ -21,9 +21,9 @@ def extract_comments_from_diagram(sparx):
     if d_id is None:
         logging.error("User aborted the diagram ID selection. Diagram ID is None")
         return
-    
-    df = sparx.query_for_diagram_comments(d_id)
+        
     if jira_suc:
+        df = sparx.query_for_diagram_comments(d_id)
         story_id = input("Input JIRA Issue ID (e.g., RCD-1. Enter to skip): ")
     
     sparx.write_dataframe_series_to_html(df["comment"], story_id)   
