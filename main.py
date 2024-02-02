@@ -21,7 +21,7 @@ def extract_comments_from_diagram(sparx):
         return
     
     df = sparx.query_for_diagram_comments(d_id)
-    sparx.write_dataframe_series_to_html(df["Comment"])   
+    sparx.write_dataframe_series_to_html(df["comment"])   
 
 def main():
     parser = argparse.ArgumentParser(description='Sparx Automation Tool', formatter_class=argparse.RawTextHelpFormatter)

@@ -50,8 +50,9 @@ class SparxAutomator:
         root = ET.fromstring(result_set)
         root = root.find("Dataset_0").find("Data")
 
-        # Extract column names from the first row
-        column_names = [element.tag for element in root[0]]
+        # Extract column names from the first row. With new EA, seems like the
+        # SQL query names get capitalized, so I wll make every single column lowercase.
+        column_names = [element.tag.lower() for element in root[0]]
 
         # Extract data from XML and create a list of dictionaries
         data = [{element.tag: element.text for element in row} for row in root]
