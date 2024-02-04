@@ -1,5 +1,7 @@
 # sparx_automation
-A tool to be built on that will enable the automation of sparx
+A tool to be built on that will enable the automation of sparx.
+
+This will create, and update comments on a specific JIRA story based on diagram comments as well.
 
 ## Comment Extraction
 If you are looking to extract comments from a diagram in EA, there are a couple of things that need to happen first.
