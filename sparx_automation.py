@@ -158,8 +158,10 @@ class SparxAutomator:
             WHERE
                 (t_object.Object_Type = 'Note' OR t_object.Stereotype = 'Note') AND
                 t_diagram.Diagram_ID = {diagram_id};"""
-
-        return self.execute_sql_query(q)
+        try:
+            return self.execute_sql_query(q)
+        except:
+            return pd.DataFrame(data={"Empty": [None]})
 
     def add_jira_comment(self, story_id, content):
         """Generates a comment in JIRA via the API.
