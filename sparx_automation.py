@@ -23,30 +23,18 @@ class SparxAutomator:
             eaApp = win32com.client.Dispatch("EA.App")
             self.ea_repository = eaApp.Repository
         else:
-            self.ea_repository = win32com.client.Dispatch("EA.Repository")
-        
-        # Load in the configuration file.
-        self.config = ET.parse("./cfg/config.xml").getroot()
-    
+            self.ea_repository = win32com.client.Dispatch("EA.Repository")        
+
+        self.load_config()
+
         self.log.info(f"Repository Connection Established")
         print(f"Repository Connection Established")
     
+    def load_config(self):
+        # Load in the configuration file.
+        self.config = ET.parse("./cfg/config.xml").getroot()
 
-    def authenticate_jira(self):
-        """Authenticates via user email and an API key they generate for their email.
-
-        Returns:
-            boolean: Indication of whether or not the user is authenticated.
-        """
-        # Define login parameters.
-        jira_config = self.config.find("jira")
-        user_name = jira_config.find("email").text
-        api_key = jira_config.find("api_key").text
-        self.jira_url = 'https://resilienx.atlassian.net/'
-        
-        # Create JIRA object.
-        self.jira = JIRA(self.jira_url, basic_auth=(user_name, api_key))
-        
+    def check_jira_authentication(self):
         # Check for successful authentication
         try:
             curr_user = self.jira.current_user()
@@ -58,7 +46,39 @@ class SparxAutomator:
         
         return True
 
-    def get_current_diagram_id(self):
+    def authenticate_jira(self):
+        """Authenticates via user email and an API key they generate for their email.
+
+        Returns:
+            boolean: Indication of whether or not the user is authenticated.
+        """
+        # Define login parameters.
+        jira_config = self.config.find("jira")
+        user_name = jira_config.find("acctEmail").text
+        api_key = jira_config.find("jiraApiKey").text
+        self.jira_url = 'https://resilienx.atlassian.net/'
+        
+        # Create JIRA object.
+        self.jira = JIRA(self.jira_url, basic_auth=(user_name, api_key))
+        
+        # Check for auth success.
+        return self.check_jira_authentication()
+
+    def user_accept_current_diagram(self, active_diagram):
+        # Prompt the user to check if the name is correct and what they want.
+        is_correct = input("Is this the diagram you want?\nIf not, go and select the diagram in Sparx and return here.\nDiagram Correct (y/n) or Quit (q): ")
+        if is_correct.lower() == "y":
+            return active_diagram.DiagramID
+        
+        # If not, then re-run the function.
+        elif is_correct.lower() == "n":
+            return self.get_current_diagram_name()
+        
+        # Otherwise, quit the script.
+        else:
+            return None
+
+    def get_current_diagram_name(self, input=True):
         """Returns the ID of the Current Diagram.
 
         Returns:
@@ -74,19 +94,11 @@ class SparxAutomator:
             self.log.info(f"Current Diagram ID: {active_diagram.DiagramID}")
             
             print(f"Current Diagram Name: {active_diagram.name}")
-
-            # Prompt the user to check if the name is correct and what they want.
-            is_correct = input("Is this the diagram you want?\nIf not, go and select the diagram in Sparx and return here.\nDiagram Correct (y/n) or Quit (q): ")
-            if is_correct.lower() == "y":
-                return active_diagram.DiagramID
+            if input:
+                return self.user_accept_current_diagram(active_diagram)
             
-            # If not, then re-run the function.
-            elif is_correct.lower() == "n":
-                return self.get_current_diagram_id()
+            return active_diagram
             
-            # Otherwise, quit the script.
-            else:
-                return None
         except AttributeError:
             self.log.error("No diagram active!")
             print("No diagram selected! Go select in Enterprise Architect")
@@ -146,7 +158,7 @@ class SparxAutomator:
             WHERE
                 (t_object.Object_Type = 'Note' OR t_object.Stereotype = 'Note') AND
                 t_diagram.Diagram_ID = {diagram_id};"""
-                
+
         return self.execute_sql_query(q)
 
     def add_jira_comment(self, story_id, content):
@@ -179,6 +191,18 @@ class SparxAutomator:
         self.log.info(f"Update comment ID: {comment.id}")
         comment.update(body=comment_txt)
 
+    def extract_comments_from_diagram(self, criteria_dict, html=False):
+        d_id = str(criteria_dict["tcDiagramId"])
+
+        if d_id is None:
+            logging.error("User aborted the diagram ID selection. Diagram ID is None")
+            return
+
+        df = self.query_for_diagram_comments(d_id)
+        if html:
+            self.write_dataframe_to_html_and_jira(df, "")
+        return df
+
     def write_dataframe_to_html_and_jira(self, df, story_id, file_name = None):
         """Writes a dataframe to HTML but also adds JIRA comments if the user specified a story for it.
 
@@ -187,7 +211,6 @@ class SparxAutomator:
             story_id (str): The JIRA story ID (e.g., RCD-1)
             file_name (str, optional): The name of the file to save the html to. Defaults to None.
         """
-
         # Replace 'output_file.txt' with your desired output file path
         if file_name is None:
             file_name = "output_file.html"
@@ -257,3 +280,41 @@ class SparxAutomator:
             webbrowser.open(file_name)
         else:
             webbrowser.open(f"{self.jira_url}/browse/{story_id}")
+        
+        return data_df[(data_df["objectid"] == df["objectid"]) & (data_df["JIRA_Task"] == story_id)]
+
+    def manage_status(self, resource):
+        try:
+            if resource == "progress":
+                return ""
+        except:
+            self.log.exception("message")
+
+class ConfigMgr:
+    def __init__(self) -> None:
+        self.tree = ET.parse("./cfg/config.xml")
+        self.root = self.tree.getroot()
+        self.comment_extraction = self.root.find("comment_extraction")
+        self.jira_cfg = self.root.find("jira")
+    
+    def pull_criteria(self, field, type):        
+        return self.root.find(type).find(field).text
+    
+    def store_criteria(self, criteria_dict, type=None):
+        try:
+            cfg = self.root.find(type)
+        except Exception as e:
+            print(e)
+            return False
+        
+        for key in list(criteria_dict.keys()):
+            cfg.find(key).text = str(criteria_dict[key])
+        
+        self.tree.write("./cfg/config.xml")
+    
+    def assign_type(self, criteria_dict):
+        for key in list(criteria_dict.keys()):
+            if key == "tcIssueId":
+                criteria_dict[key] = str(criteria_dict[key])
+        
+        return criteria_dict

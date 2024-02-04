@@ -16,7 +16,7 @@ logging.basicConfig(filename="sparx_automation.log", filemode="w", format='%(asc
 def extract_comments_from_diagram(sparx):
     jira_suc = sparx.authenticate_jira()
 
-    d_id = sparx.get_current_diagram_id()
+    d_id = sparx.get_current_diagram_name()
     
     if d_id is None:
         logging.error("User aborted the diagram ID selection. Diagram ID is None")

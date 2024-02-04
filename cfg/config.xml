@@ -1,6 +1,13 @@
 <data>
+    <model_path />    
     <jira>
-        <email></email>
-        <api_key></api_key>
+        <acctEmail></acctEmail>
+        <jiraApiKey></jiraApiKey>
     </jira>
+    <comment_extraction>
+        <tcIssueId>RCD-192</tcIssueId>
+        <sendToJira>False</sendToJira>
+        <tcDiagramId>1062</tcDiagramId>
+        <tcDiagramName>Monitor Craft Telemetry</tcDiagramName>
+    </comment_extraction>
 </data>
