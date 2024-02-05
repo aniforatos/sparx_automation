@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1051</width>
+    <width>1060</width>
     <height>581</height>
    </rect>
   </property>
@@ -44,6 +44,11 @@ font: {12px Arial;}
    <layout class="QVBoxLayout" name="verticalLayout_3">
     <item>
      <widget class="QTabWidget" name="tabWidget">
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">QWidget{background-color:rgb(60,60,60);}
 QTabWidget::pane {
@@ -78,13 +83,13 @@ QTabBar::tab:selected {
        <attribute name="title">
         <string>Comment Extraction</string>
        </attribute>
-       <widget class="QWidget" name="">
+       <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
           <x>10</x>
           <y>30</y>
           <width>997</width>
-          <height>402</height>
+          <height>404</height>
          </rect>
         </property>
         <layout class="QGridLayout" name="gridLayout_4">
@@ -148,11 +153,17 @@ QHeaderView::section {
            <property name="autoScroll">
             <bool>true</bool>
            </property>
+           <property name="verticalScrollMode">
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
            <attribute name="horizontalHeaderCascadingSectionResizes">
             <bool>true</bool>
            </attribute>
+           <attribute name="horizontalHeaderDefaultSectionSize">
+            <number>32</number>
+           </attribute>
            <attribute name="horizontalHeaderStretchLastSection">
-            <bool>true</bool>
+            <bool>false</bool>
            </attribute>
            <attribute name="verticalHeaderStretchLastSection">
             <bool>false</bool>
@@ -198,6 +209,11 @@ color: rgb(169, 254, 0);</string>
             <layout class="QGridLayout" name="gridLayout">
              <item row="7" column="0">
               <widget class="QLabel" name="label_4">
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
+               </property>
                <property name="styleSheet">
                 <string notr="true"/>
                </property>
@@ -208,6 +224,11 @@ color: rgb(169, 254, 0);</string>
              </item>
              <item row="4" column="0" colspan="3">
               <widget class="QPushButton" name="updateDiagram">
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
+               </property>
                <property name="cursor">
                 <cursorShape>PointingHandCursor</cursorShape>
                </property>
@@ -234,6 +255,11 @@ color: rgb(169, 254, 0);</string>
              </item>
              <item row="0" column="0">
               <widget class="QLabel" name="label_2">
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
+               </property>
                <property name="styleSheet">
                 <string notr="true"/>
                </property>
@@ -244,6 +270,11 @@ color: rgb(169, 254, 0);</string>
              </item>
              <item row="7" column="1" colspan="2">
               <widget class="QLineEdit" name="tcIssueId">
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
+               </property>
                <property name="styleSheet">
                 <string notr="true">color: rgb(255, 255, 255);
 background-color: rgb(66, 66, 66);</string>
@@ -257,6 +288,11 @@ background-color: rgb(66, 66, 66);</string>
               <widget class="QLineEdit" name="tcDiagramName">
                <property name="enabled">
                 <bool>false</bool>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
                </property>
                <property name="styleSheet">
                 <string notr="true">background-color: rgb(66, 66, 66);
@@ -282,6 +318,11 @@ color: rgb(255, 255, 255);</string>
              </item>
              <item row="2" column="0">
               <widget class="QLabel" name="label_5">
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
+               </property>
                <property name="text">
                 <string>Diagram ID</string>
                </property>
@@ -291,6 +332,11 @@ color: rgb(255, 255, 255);</string>
               <widget class="QLineEdit" name="tcDiagramId">
                <property name="enabled">
                 <bool>false</bool>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
                </property>
               </widget>
              </item>
@@ -326,6 +372,11 @@ color: rgb(255, 255, 255);</string>
              </item>
              <item>
               <widget class="QCheckBox" name="openHtml">
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
+               </property>
                <property name="text">
                 <string>Open Comments in HTML</string>
                </property>
@@ -340,6 +391,11 @@ color: rgb(255, 255, 255);</string>
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>10</pointsize>
+                  </font>
                  </property>
                  <property name="cursor">
                   <cursorShape>PointingHandCursor</cursorShape>
@@ -363,6 +419,11 @@ color: rgb(255, 255, 255);</string>
                  <property name="enabled">
                   <bool>false</bool>
                  </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>10</pointsize>
+                  </font>
+                 </property>
                  <property name="styleSheet">
                   <string notr="true">#sendJira:disabled{
 	
@@ -383,6 +444,11 @@ color: rgb(255, 255, 255);</string>
              </item>
              <item>
               <widget class="QPushButton" name="stopBtn">
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
+               </property>
                <property name="cursor">
                 <cursorShape>PointingHandCursor</cursorShape>
                </property>
@@ -405,13 +471,13 @@ color: rgb(255, 255, 255);</string>
        <attribute name="title">
         <string>Setup</string>
        </attribute>
-       <widget class="QWidget" name="">
+       <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
           <x>10</x>
           <y>10</y>
           <width>780</width>
-          <height>167</height>
+          <height>238</height>
          </rect>
         </property>
         <layout class="QGridLayout" name="gridLayout_3">
@@ -434,6 +500,11 @@ color: rgb(169, 254, 0);;</string>
           <layout class="QGridLayout" name="gridLayout_2">
            <item row="0" column="0">
             <widget class="QLabel" name="label_9">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
              <property name="text">
               <string>JIRA Email</string>
              </property>
@@ -444,7 +515,7 @@ color: rgb(169, 254, 0);;</string>
              <property name="font">
               <font>
                <family>Arial</family>
-               <pointsize>-1</pointsize>
+               <pointsize>10</pointsize>
                <weight>50</weight>
                <italic>false</italic>
                <bold>false</bold>
@@ -457,10 +528,21 @@ color: rgb(169, 254, 0);;</string>
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QLineEdit" name="acctEmail"/>
+            <widget class="QLineEdit" name="acctEmail">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+            </widget>
            </item>
            <item row="1" column="0">
             <widget class="QLabel" name="label_10">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
              <property name="text">
               <string>API Key</string>
              </property>
@@ -468,6 +550,11 @@ color: rgb(169, 254, 0);;</string>
            </item>
            <item row="2" column="0" colspan="2">
             <widget class="QLabel" name="label_6">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
              <property name="styleSheet">
               <string notr="true"/>
              </property>
@@ -489,6 +576,11 @@ color: rgb(169, 254, 0);;</string>
          </item>
          <item row="2" column="0">
           <widget class="QPushButton" name="saveInfo">
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+            </font>
+           </property>
            <property name="cursor">
             <cursorShape>PointingHandCursor</cursorShape>
            </property>
@@ -502,6 +594,11 @@ color: rgb(169, 254, 0);;</string>
          </item>
          <item row="3" column="0">
           <widget class="QPushButton" name="testJiraConnection">
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+            </font>
+           </property>
            <property name="cursor">
             <cursorShape>PointingHandCursor</cursorShape>
            </property>
@@ -553,8 +650,8 @@ QProgressBar::chunk{
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1051</width>
-     <height>26</height>
+     <width>1060</width>
+     <height>27</height>
     </rect>
    </property>
    <property name="styleSheet">

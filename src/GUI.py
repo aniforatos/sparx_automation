@@ -20,15 +20,23 @@ from src.sparx_auto_ui import Ui_MainWindow
 sys._excepthook = sys.excepthook
 bool_dict = {"True": True, "False": False}
 
+# Handle high resolution displays:
+if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
+    QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
+    QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+    
 class GuiController(QtWidgets.QMainWindow):
 
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
         self.ui = uic.loadUi("sparx_auto_ui.ui", self)
+         
+        
         # self.ui = Ui_MainWindow()
         # self.ui.setWindowIcon(QtGui.QIcon("./app_icon.ico"))
         # Handle when button clicked. Sends to scan function.
-        self.extractCommentsBtn.clicked.connect(lambda: self.begin_comment_extraction(self.extractCommentsBtn))
+        self.extractCommentsBtn.clicked.connect(lambda: self.handle_start_button(self.extractCommentsBtn))
         self.stopBtn.clicked.connect(lambda: self.stop(self.stopBtn))
         self.updateDiagram.clicked.connect(lambda: self.populateDiagramField(self.updateDiagram))
         self.saveInfo.clicked.connect(lambda: self.setup_acct("save"))
@@ -81,12 +89,6 @@ class GuiController(QtWidgets.QMainWindow):
         if index == 2:
             self.statusbar.showMessage("No. of Tickers that meet criteria: " + str(cnt))
 
-    # def check_login(self):
-    #     if self.isVerified:
-    #         self.statusbar.showMessage("JIRA Account Login Successful!")
-    #     else:
-    #         self.statusbar.showMessage("JIRA Account Login Failed... Be sure to set up account!")
-
     def setup_acct(self, field):
         _translate = QtCore.QCoreApplication.translate
         if field == "save":
@@ -103,7 +105,7 @@ class GuiController(QtWidgets.QMainWindow):
         # TO be used to actually finish the verification process for the API, this was used as a test for encryption.
         elif field == "verify":
             self.isVerified = self.sparx.check_jira_authentication()
-            self.statusbar.showMessage(f"JIRA Authenticated: {self.isVerified}")
+            self.statusbar.showMessage(f"JIRA Authenticated: {self.isVerified}... Enter your information on the Setup tab.")
 
 
     def send_comments_to_jira(self, b):
@@ -115,12 +117,6 @@ class GuiController(QtWidgets.QMainWindow):
             self.statusbar.showMessage("You are not Authenticated with JIRA!")
         
         self.progressBar.setValue(100)
-    def begin_comment_extraction(self, b):
-        '''Begin a thread to begin the Scan.'''
-
-        # self.t = threading.Thread(target=self.handle_start_button, args=(b,))
-        # self.t.start()
-        self.handle_start_button(b)
 
     def save_results(self):
 
@@ -133,7 +129,10 @@ class GuiController(QtWidgets.QMainWindow):
         model = pandasModel(self.results_df)   
         self.tableView.setModel(model)
         self.tableView.setWordWrap(True)
-        self.tableView.resizeRowsToContents()
+        
+        # self.tableView.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
+        self.tableView.resizeColumnsToContents()
+        # self.tableView.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretc)
 
     def run_comment_extraction(self, criteria_dict):
         self.statusbar.showMessage("Beginning comment extractin...")
