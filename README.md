@@ -8,6 +8,8 @@ This tool now has a GUI associated with it, just run:
 * `pip install -r requirements.txt`
 *  `python ./main_ui.py`
 
+Use the "Setup" tab to enter your JIRA login information.
+
 This will give you the ability to set up your JIRA account and give you instant feedback as to what diagram you are focused on and the ability to changed your
 issue ID on the fly.
 
