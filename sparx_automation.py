@@ -102,7 +102,7 @@ class SparxAutomator:
         except AttributeError:
             self.log.error("No diagram active!")
             print("No diagram selected! Go select in Enterprise Architect")
-            exit(0)
+            return None
         
     def execute_sql_query(self, query):
         """Execute a SQL query in Enterprise Architect.
@@ -147,23 +147,61 @@ class SparxAutomator:
                 t_object.Name AS ElementName,
                 t_object.Note AS Comment,
                 t_object.Object_Type as Type,
-                t_object.Object_ID as ObjectID
+                t_object.Object_ID as ObjectID,
+                t2.Name as Target_Name,
+	            t_connector.End_Object_ID as TargetObject
+
             FROM
                 t_diagramobjects
             JOIN
                 t_diagram ON t_diagram.Diagram_ID = t_diagramobjects.Diagram_ID
             JOIN
-                t_object ON t_object.Object_ID = t_diagramobjects.Object_ID
+                t_object ON t_object.Object_ID = t_diagramobjects.Object_ID            
+            LEFT JOIN 
+	            t_connector ON t_object.object_id = t_connector.Start_Object_ID
+            LEFT JOIN
+	            t_object t2 ON t_connector.End_Object_ID = t2.Object_ID
 
             WHERE
                 (t_object.Object_Type = 'Note' OR t_object.Stereotype = 'Note') AND
                 t_diagram.Diagram_ID = {diagram_id};"""
         try:
-            return self.execute_sql_query(q)
-        except:
+            df = self.execute_sql_query(q)
+
+            # House cleaning to collapse dataframe duplicated OBJECTIDs into single row.
+            df = df.groupby("objectid").agg(lambda x: x.tolist() if x.nunique() > 1 else x.iloc[0]).reset_index()
+            
+            return df
+        except Exception as e:
+
+            self.log.error("Failed to execute SQL Query, returning empty dataframe.")
+            self.log.error(e)
             return pd.DataFrame(data={"Empty": [None]})
 
-    def add_jira_comment(self, story_id, content):
+    def create_content(self, row):
+        """Takes in the row to be added as a comment to JIRA and creates
+        a comment body from multiple columns.
+
+        Args:
+            row (pandas.core.Series): Row containing information to populate the comment.
+
+        Returns:
+            str: Comment body string to be added to JIRA.
+        """
+        # Add the targets to the beginning of the comment.
+        if type(row["target_name"]) == list:
+            content = ', '.join(row["target_name"]) + "\n"
+        elif type(row["target_name"]) == str:
+            content = row["target_name"] + "\n"
+        else:
+            content = ""
+
+        # Append the comment text to the target name header that was added.
+        content += row["comment"]
+
+        return content
+
+    def add_jira_comment(self, story_id, row):
         """Generates a comment in JIRA via the API.
 
         Args:
@@ -171,21 +209,27 @@ class SparxAutomator:
             content (string): The comment from the diagram highlighted.
         """
 
+        # Create content for JIRA comment
+        content = self.create_content(row)
+
         # Add bullets instead of list tags
         content = content.replace('<li>', '* ')
 
         # Remove html tags.
         clean_text = re.sub('<.*?>', '', content)
         self.log.info(f"Adding comment: {clean_text}")
-
+        
         # Add the comment.
         comment = self.jira.add_comment(story_id, clean_text)
 
         # Return the comment to be added to the dataframe.
         return comment.id
     
-    def update_jira_comment(self, data_df_row, story_id, comment_txt):
-        
+    def update_jira_comment(self, data_df_row, story_id, row):
+                
+        # Create content for JIRA comment
+        comment_txt = self.create_content(row)
+
         # Get the comment
         comment = self.jira.comment(story_id, str(data_df_row.loc[0, "JiraCommentID"]))
         
@@ -250,7 +294,7 @@ class SparxAutomator:
 
                                 # Update in JIRA.
                                 self.log.info(f"Updating JIRA Comment: {row['JiraCommentID']}")
-                                self.update_jira_comment(data_df_row, story_id, row["comment"])
+                                self.update_jira_comment(data_df_row, story_id, row)
 
                                 # Update dataframe.
                                 data_df.loc[data_df['objectid'] == row['objectid'], "comment"] = row["comment"]
@@ -260,7 +304,7 @@ class SparxAutomator:
 
                             # Add the JIRA comment to JIRA
                             self.log.info("Adding new JIRA comment.")
-                            c_id = self.add_jira_comment(story_id, row["comment"])   
+                            c_id = self.add_jira_comment(story_id, row)   
 
                             # Add the new comment as a row in the database.
                             row.loc["JiraCommentID"] = int(c_id); row.loc["JIRA_Task"] = story_id
@@ -282,7 +326,8 @@ class SparxAutomator:
             webbrowser.open(file_name)
         else:
             webbrowser.open(f"{self.jira_url}/browse/{story_id}")
-        
+
+        # Return the comments that are currently stored in JIRA
         return data_df[(data_df["objectid"] == df["objectid"]) & (data_df["JIRA_Task"] == story_id)]
 
     def manage_status(self, resource):

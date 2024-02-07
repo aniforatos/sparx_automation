@@ -105,7 +105,10 @@ class GuiController(QtWidgets.QMainWindow):
         # TO be used to actually finish the verification process for the API, this was used as a test for encryption.
         elif field == "verify":
             self.isVerified = self.sparx.check_jira_authentication()
-            self.statusbar.showMessage(f"JIRA Authenticated: {self.isVerified}... Enter your information on the Setup tab.")
+            if self.isVerified:
+                self.statusbar.showMessage(f"JIRA Authenticated: {self.isVerified}")
+            else:
+                self.statusbar.showMessage(f"JIRA Authenticated: {self.isVerified}... Enter your information on the Setup tab.")
 
 
     def send_comments_to_jira(self, b):
@@ -129,10 +132,15 @@ class GuiController(QtWidgets.QMainWindow):
         model = pandasModel(self.results_df)   
         self.tableView.setModel(model)
         self.tableView.setWordWrap(True)
-        
-        # self.tableView.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
         self.tableView.resizeColumnsToContents()
-        # self.tableView.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretc)
+        self.tableView.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
+                
+        # Resize the first column (adjust the value based on your needs)
+        self.tableView.setColumnWidth(3, 200)
+        self.tableView.setColumnWidth(5, 200)
+
+        # Set word wrap for the first column
+        self.tableView.setWordWrap(True)
 
     def run_comment_extraction(self, criteria_dict):
         self.statusbar.showMessage("Beginning comment extractin...")
@@ -148,11 +156,13 @@ class GuiController(QtWidgets.QMainWindow):
         self.sendJira.setEnabled(True)           
 
     def populateDiagramField(self, btn):
+
         active_diagram = self.sparx.get_current_diagram_name(input=False)
-        self.centralwidget.findChild(QtWidgets.QLineEdit, "tcDiagramId").setText(str(active_diagram.DiagramID))
-        self.centralwidget.findChild(QtWidgets.QLineEdit, "tcDiagramName").setText(active_diagram.name)
-        self.criteria_dict["tcDiagramId"] = active_diagram.DiagramID
-        self.criteria_dict["tcDiagramName"] = active_diagram.name
+        if active_diagram is not None:
+            self.centralwidget.findChild(QtWidgets.QLineEdit, "tcDiagramId").setText(str(active_diagram.DiagramID))
+            self.centralwidget.findChild(QtWidgets.QLineEdit, "tcDiagramName").setText(active_diagram.name)
+            self.criteria_dict["tcDiagramId"] = active_diagram.DiagramID
+            self.criteria_dict["tcDiagramName"] = active_diagram.name
 
     def run_scan(self, criteria_dict):
         '''Begin the scan through all tickers.'''

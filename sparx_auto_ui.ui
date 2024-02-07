@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1060</width>
-    <height>581</height>
+    <width>1056</width>
+    <height>570</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -154,6 +154,9 @@ QHeaderView::section {
             <bool>true</bool>
            </property>
            <property name="verticalScrollMode">
+            <enum>QAbstractItemView::ScrollPerPixel</enum>
+           </property>
+           <property name="horizontalScrollMode">
             <enum>QAbstractItemView::ScrollPerPixel</enum>
            </property>
            <attribute name="horizontalHeaderCascadingSectionResizes">
@@ -650,8 +653,8 @@ QProgressBar::chunk{
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1060</width>
-     <height>27</height>
+     <width>1056</width>
+     <height>31</height>
     </rect>
    </property>
    <property name="styleSheet">
