@@ -114,7 +114,16 @@ class GuiController(QtWidgets.QMainWindow):
     def send_comments_to_jira(self, b):
         self.progressBar.setValue(0)
         if self.isVerified:
-            self.results_df = self.sparx.write_dataframe_to_html_and_jira(self.results_df, self.criteria_dict["tcIssueId"])
+            try:
+                selected_rows = self.tableView.selectionModel().selectedRows()
+                selected_rows = [x.row() for x in selected_rows]
+                sub_df = self.results_df.iloc[selected_rows].reset_index(drop=True)
+                
+                print(f"Sending Rows {selected_rows} to JIRA")
+            except AttributeError:
+                print(f"Sending All Rows to JIRA")
+                sub_df = self.results_df
+            self.results_df = self.sparx.write_dataframe_to_html_and_jira(sub_df, self.criteria_dict["tcIssueId"])
             self.update_table()
         else:
             self.statusbar.showMessage("You are not Authenticated with JIRA!")
@@ -140,7 +149,7 @@ class GuiController(QtWidgets.QMainWindow):
         self.tableView.setColumnWidth(5, 200)
 
         # Set word wrap for the first column
-        self.tableView.setWordWrap(True)
+        self.tableView.setWordWrap(True)        
 
     def run_comment_extraction(self, criteria_dict):
         self.statusbar.showMessage("Beginning comment extractin...")

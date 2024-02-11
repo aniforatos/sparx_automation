@@ -278,7 +278,7 @@ class SparxAutomator:
                     if story_id != "":
                         
                         # Check if the object ID exists in the database.
-                        if row["objectid"] in data_df["objectid"].values:
+                        if row["objectid"] in data_df["objectid"].values and story_id in data_df["JIRA_Task"].values:
 
                             # Define the sub-dataframe filtered on object ID.
                             data_df_row = data_df.loc[data_df['objectid'] == row['objectid'], :].reset_index()
@@ -326,9 +326,9 @@ class SparxAutomator:
             webbrowser.open(file_name)
         else:
             webbrowser.open(f"{self.jira_url}/browse/{story_id}")
-
+        
         # Return the comments that are currently stored in JIRA
-        return data_df[(data_df["objectid"] == df["objectid"]) & (data_df["JIRA_Task"] == story_id)]
+        return data_df[(data_df["objectid"].isin(df["objectid"])) & (data_df["JIRA_Task"] == story_id)]
 
     def manage_status(self, resource):
         try:
