@@ -5,9 +5,16 @@
         <jiraApiKey></jiraApiKey>
     </jira>
     <comment_extraction>
-        <tcIssueId>RCD-192</tcIssueId>
+        <tcIssueId>RCD-128</tcIssueId>
         <sendToJira>False</sendToJira>
-        <tcDiagramId>1062</tcDiagramId>
-        <tcDiagramName>Monitor Craft Telemetry</tcDiagramName>
+        <tcDiagramId>194</tcDiagramId>
+        <tcDiagramName>Network Analyzer Service</tcDiagramName>
     </comment_extraction>
+    <requirement_colors>
+        <!--RGB Colors-->
+        <Proposed>(112, 106, 232)</Proposed>
+        <Implemented>(106, 235, 106)</Implemented>
+        <Validated>(106, 235, 106)</Validated>
+        <Approved>(245,167,66)</Approved>
+    </requirement_colors>
 </data>

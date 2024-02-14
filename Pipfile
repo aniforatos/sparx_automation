@@ -10,6 +10,7 @@ bs4 = "*"
 jira = {extras = ["cli"], version = "*"}
 pyqt5 = "*"
 pyside2 = "*"
+tqdm = "*"
 
 [dev-packages]
 ipykernel = "*"

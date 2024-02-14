@@ -9,6 +9,8 @@ import xml.etree.ElementTree as ET
 import logging
 import webbrowser
 import re
+import time
+from tqdm import tqdm
 
 from jira import JIRA
 
@@ -23,16 +25,26 @@ class SparxAutomator:
             eaApp = win32com.client.Dispatch("EA.App")
             self.ea_repository = eaApp.Repository
         else:
-            self.ea_repository = win32com.client.Dispatch("EA.Repository")        
+            self.ea_repository = win32com.client.Dispatch("EA.Repository") 
 
         self.load_config()
-
+        self.define_color_mapping()
         self.log.info(f"Repository Connection Established")
         print(f"Repository Connection Established")
     
     def load_config(self):
         # Load in the configuration file.
         self.config = ET.parse("./cfg/config.xml").getroot()
+
+    def define_color_mapping(self):
+        # Load the color mapping for requirements from config.
+        req_color_config = self.config.find("requirement_colors")
+        self.status_color_map = {
+            "Proposed": eval(req_color_config.find("Proposed").text)[::-1],
+            "Implemented": eval(req_color_config.find("Implemented").text)[::-1],
+            "Approved": eval(req_color_config.find("Implemented").text)[::-1],
+            "Default": (0, 0, 0)
+        } 
 
     def check_jira_authentication(self):
         # Check for successful authentication
@@ -68,7 +80,7 @@ class SparxAutomator:
         # Prompt the user to check if the name is correct and what they want.
         is_correct = input("Is this the diagram you want?\nIf not, go and select the diagram in Sparx and return here.\nDiagram Correct (y/n) or Quit (q): ")
         if is_correct.lower() == "y":
-            return active_diagram.DiagramID
+            return active_diagram
         
         # If not, then re-run the function.
         elif is_correct.lower() == "n":
@@ -77,6 +89,22 @@ class SparxAutomator:
         # Otherwise, quit the script.
         else:
             return None
+    
+    def loop_diagram_objects(self, d_obj, df, revert):
+        for obj in tqdm(d_obj.DiagramObjects):
+            if obj.ElementID in df["objectid"].values:                
+                row = df.loc[df["objectid"] == obj.ElementID, :].iloc[0]               
+                color = self.status_color_map[row["status"]]
+                if revert:
+                    color = self.status_color_map["Default"]
+                
+                # Log the color settings.
+                self.log.debug(f"Setting ({row['elementname']}) to RGB color: {color[::-1]}")                
+
+                rgb_integer = (color[0] << 16) + (color[1] << 8) + color[2]
+                obj.SetStyleEx("BCol",str(rgb_integer))
+                obj.Update()
+                time.sleep(0.5)
 
     def get_current_diagram_name(self, input=True):
         """Returns the ID of the Current Diagram.
@@ -140,6 +168,26 @@ class SparxAutomator:
         self.log.debug(f"Dataframe from SQL Query: {df}")
 
         return df
+
+    def query_for_diagram_requirements(self, diagram_id):
+        sql_query = f"""SELECT
+                t_diagram.Name AS DiagramName,
+                t_object.Name AS ElementName,
+                 t_object.Status as Status,
+                t_object.Object_Type as Type,
+                t_object.Object_ID as ObjectID               
+            FROM
+                t_diagramobjects
+            JOIN
+                t_diagram ON t_diagram.Diagram_ID = t_diagramobjects.Diagram_ID
+            JOIN
+                t_object ON t_object.Object_ID = t_diagramobjects.Object_ID 
+        WHERE
+            /* Specify the Diagram GUI ID */
+            t_diagram.Diagram_ID = {diagram_id}
+            AND t_object.Object_Type = 'Requirement';"""
+        
+        return self.execute_sql_query(sql_query)
 
     def query_for_diagram_comments(self, diagram_id):
         q = f"""SELECT
