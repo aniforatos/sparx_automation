@@ -19,6 +19,12 @@ If you are looking to extract comments from a diagram in EA, there are a couple 
 2. Make sure that your diagram is in-view (i.e., The diagram is displaying in your EA Application)
     * The script will make you double check that the name of the diagram is the one you want.
 
+## Requirement Diagram Coloring
+If you are aiming to color requirements based on status, this additional feature will enable that. You can go to `./cfg/config.xml` to change the color of your requirements.
+Just run the script as follows:
+* To Color Requirements: `python ./main.py --action r`
+* To Set Requirements Colors to Default: `python ./main.py --action r`
+
 ## Running the Tool
 simply run `python main.py -h` to understand the different options you have for automation.
 
