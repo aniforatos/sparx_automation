@@ -2,7 +2,7 @@
     <model_path />    
     <jira>
         <acctEmail>angelo.niforatos@resilienx.com</acctEmail>
-        <jiraApiKey>ATATT3xFfGF0AIithQvIJCPez_JHWgPtWoNnPV5Hv1WfsLNPGmZsAFxTOhQouyGcnloL_ymBdal5RNUzpO9zRx9eljWlxcPlkkl7cV49OEzSodhPYmiFupV5hp-_uly_IRXFNuHH5ZCAT5NUXLxm_pro2V2p_3t3-2gLyT_NK0SbQ0FvOYRp1ow=F98FBA4F</jiraApiKey>
+        <jiraApiKey></jiraApiKey>
     </jira>
     <comment_extraction>
         <tcIssueId>RCD-128</tcIssueId>
