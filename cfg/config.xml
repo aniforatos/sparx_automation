@@ -1,17 +1,19 @@
 <data>
     <model_path />    
     <jira>
-        <acctEmail></acctEmail>
-        <jiraApiKey></jiraApiKey>
+        <acctEmail>angelo.niforatos@resilienx.com</acctEmail>
+        <jiraApiKey>ATATT3xFfGF0AIithQvIJCPez_JHWgPtWoNnPV5Hv1WfsLNPGmZsAFxTOhQouyGcnloL_ymBdal5RNUzpO9zRx9eljWlxcPlkkl7cV49OEzSodhPYmiFupV5hp-_uly_IRXFNuHH5ZCAT5NUXLxm_pro2V2p_3t3-2gLyT_NK0SbQ0FvOYRp1ow=F98FBA4F</jiraApiKey>
     </jira>
     <comment_extraction>
         <tcIssueId>RCD-128</tcIssueId>
         <sendToJira>False</sendToJira>
-        <tcDiagramId>194</tcDiagramId>
-        <tcDiagramName>Network Analyzer Service</tcDiagramName>
+        <tcDiagramId>845</tcDiagramId>
+        <tcDiagramName>SDSP Monitoring Service</tcDiagramName>
     </comment_extraction>
     <requirement_colors>
-        <!--RGB Colors-->
+        <tcDiagramId_2>194</tcDiagramId_2>
+        <tcDiagramName_2>Network Analyzer Service</tcDiagramName_2>
+        
         <Proposed>(112, 106, 232)</Proposed>
         <Implemented>(106, 235, 106)</Implemented>
         <Validated>(106, 235, 106)</Validated>

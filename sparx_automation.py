@@ -132,7 +132,7 @@ class SparxAutomator:
             print("No diagram selected! Go select in Enterprise Architect")
             return None
         
-    def execute_sql_query(self, query):
+    def execute_sql_query(self, query, re_format_cols=True):
         """Execute a SQL query in Enterprise Architect.
 
         Args:
@@ -160,15 +160,35 @@ class SparxAutomator:
         # Convert the list of dictionaries to a Pandas DataFrame
         df = pd.DataFrame(data, columns=column_names)
 
-        # Convert all column names to lowercase
-        df.columns = df.columns.str.lower()
-        df[["JiraCommentID", "JIRA_Task"]] = None
-        df["objectid"] = df["objectid"].astype(int)
+        if re_format_cols:
+            # Convert all column names to lowercase
+            df.columns = df.columns.str.lower()
+            df[["JiraCommentID", "JIRA_Task"]] = None
+            df["objectid"] = df["objectid"].astype(int)
 
         self.log.debug(f"Dataframe from SQL Query: {df}")
 
         return df
 
+    def query_requirements_from_package_list(self, guid_list):
+        # Build the list of IDs to query EA model.
+        guid_string = "(" + ",".join(f"'{guid}'" for guid in guid_list) + ")"
+        q = f"""SELECT
+                t_object.Name AS RequirementName,
+                t_object.Status AS Status,
+                t_object.Note AS Note,
+                t_package.Name AS PackageName,
+                t_object.Object_ID as ObjectID 
+            FROM
+                t_object
+            JOIN
+                t_package ON t_object.Package_ID = t_package.Package_ID
+            WHERE
+                t_object.Object_Type = 'Requirement'
+                AND t_package.ea_guid IN {guid_string};
+            """
+        return self.execute_sql_query(q, re_format_cols=False)
+    
     def query_for_diagram_requirements(self, diagram_id):
         sql_query = f"""SELECT
                 t_diagram.Name AS DiagramName,
@@ -384,6 +404,44 @@ class SparxAutomator:
                 return ""
         except:
             self.log.exception("message")
+    
+    def get_child_packages(self, parent_package):
+        """A function that recursively captures all packages.
+
+        Args:
+            parent_package (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
+        child_packages = []
+
+        # Iterate through the child packages.
+        for child_package in parent_package.Packages:
+
+            # Add the child package to the list
+            child_packages.append(child_package)
+
+            # Make sure there nested packages are handled
+            if len(child_package.Packages) > 0:
+                self.log.debug(f"Number of child packages for {child_package.Name}: {len(child_package.Packages)}")
+                child_packages.extend(self.get_child_packages(child_package))            
+
+        return child_packages
+    
+    def package_list_to_ids(self, package_list):
+        """Captures the guids from the list of packages.
+
+        Args:
+            package_list (list): List of package objects from EA.
+
+        Returns:
+            list: GUIDs of the packages in the list.
+        """
+        guid_list = []
+        for child in package_list:
+            guid_list.append(child.PackageGUID)
+        return guid_list            
 
 class ConfigMgr:
     def __init__(self) -> None:
@@ -403,7 +461,11 @@ class ConfigMgr:
             return False
         
         for key in list(criteria_dict.keys()):
-            cfg.find(key).text = str(criteria_dict[key])
+            try:
+                cfg.find(key).text = str(criteria_dict[key])
+            except AttributeError:
+                print(f"Key: {key} not in tree: {type}. Skipping.")
+                pass
         
         self.tree.write("./cfg/config.xml")
     

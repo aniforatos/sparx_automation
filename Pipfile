@@ -5,16 +5,14 @@ name = "pypi"
 
 [packages]
 pandas = "*"
-pywin32 = "*"
-bs4 = "*"
-jira = {extras = ["cli"], version = "*"}
 pyqt5 = "*"
-pyside2 = "*"
 tqdm = "*"
+pywin32 = "*"
+jira = "*"
+openpyxl = "*"
 
 [dev-packages]
 ipykernel = "*"
-pyqt5-tools = "*"
 
 [requires]
-python_version = "3.9"
+python_version = "3.12"

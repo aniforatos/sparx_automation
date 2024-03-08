@@ -52,12 +52,29 @@ def extract_comments_from_diagram(sparx):
     
     sparx.write_dataframe_to_html_and_jira(df, story_id)   
 
+
+def extract_all_child_requirements(sparx):
+    logging.info("Extracting all child requirements from a user selected repository.")
+    # Notify user to select the package they want
+    input("Ensure you have the package selected in EA (Enter to Continure): ")
+
+    # Get the currently selected package in the browser window.
+    selected_package = sparx.ea_repository.GetTreeSelectedPackage()
+    logging.info(f"The selected package is: {selected_package.Name}")
+    # Capture a list of package objects
+    package_list = sparx.get_child_packages(selected_package)
+
+    # Query all requirements from the package list.
+    df = sparx.query_requirements_from_package_list(sparx.package_list_to_ids(package_list))
+
+    # Send it to excel.
+    df.to_excel("child_requirements.xlsx")
+
 def main():
     parser = argparse.ArgumentParser(description='Sparx Automation Tool', formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('--model_path', type=str, help='Only used if you want to open a new instance of Sparx (not recommended). \
-                         Full path to the model file you want to open.')
-    parser.add_argument('--action', required=True, type=str, choices=["c", "r", "rz"], help="Available options are: \n\tc: Extract comments from current diagram.\
-                        \n\tr: Color requirements based on status\n\trv: Return requirement colors back to default")
+    parser.add_argument('--model_path', type=str, help='Full path to the model file you want to open.\nOnly used if you want to open a new instance of Sparx (not recommended).')
+    parser.add_argument('--action', required=True, type=str, choices=["c", "r", "rz", "cr"], help="Available options are: \n\tc: Extract comments from current diagram.\
+                        \n\tr: Color requirements based on status\n\trv: Return requirement colors back to default\n\tcr: Extract all child requirements from a package.")
     
     # Parse the command-line arguments
     args = parser.parse_args()
@@ -75,5 +92,7 @@ def main():
         color_requirements_by_status(sparx)
     elif args.action == "rz":
         color_requirements_by_status(sparx, revert=True)
+    elif args.action == "cr":
+        extract_all_child_requirements(sparx)
 
 main()

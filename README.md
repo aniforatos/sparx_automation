@@ -25,6 +25,13 @@ Just run the script as follows:
 * To Color Requirements: `python ./main.py --action r`
 * To Set Requirements Colors to Default: `python ./main.py --action rz`
 
+## Extracting all Requirements from Parent Package
+If you are looking to extract requirements from a parent package, this section is for you! It will recursively search through requirements within Enterprise
+Architect and accumulate GUIDs for all packages. Then this function will query all requirements that are contained within the list of package GUIDs.
+
+Just tune the script as follows:
+* `python ./main.py --action cr`
+
 ## Running the Tool
 simply run `python main.py -h` to understand the different options you have for automation.
 

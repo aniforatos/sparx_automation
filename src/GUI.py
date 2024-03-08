@@ -15,7 +15,7 @@ import logging
 import time
 import sys
 import os
-from src.sparx_auto_ui import Ui_MainWindow
+# from src.sparx_auto_ui import Ui_MainWindow
 
 sys._excepthook = sys.excepthook
 bool_dict = {"True": True, "False": False}
@@ -37,10 +37,12 @@ class GuiController(QtWidgets.QMainWindow):
         # self.ui.setWindowIcon(QtGui.QIcon("./app_icon.ico"))
         # Handle when button clicked. Sends to scan function.
         self.extractCommentsBtn.clicked.connect(lambda: self.handle_start_button(self.extractCommentsBtn))
+        self.getRequirementsBtn.clicked.connect(lambda: self.handle_start_button(self.getRequirementsBtn))
         self.stopBtn.clicked.connect(lambda: self.stop(self.stopBtn))
         self.updateDiagram.clicked.connect(lambda: self.populateDiagramField(self.updateDiagram))
+        self.updateDiagram_2.clicked.connect(lambda: self.populateDiagramField(self.updateDiagram_2))
         self.saveInfo.clicked.connect(lambda: self.setup_acct("save"))
-        self.testJiraConnection.clicked.connect(lambda: self.setup_acct("verify"))        
+        self.testJiraConnection.clicked.connect(lambda: self.setup_acct("verify"))     
         self.sendJira.clicked.connect(lambda: self.send_comments_to_jira(self.sendJira))
         self.actionSave_Results.triggered.connect(lambda: self.save_results())
         self.openHtml.stateChanged.connect(lambda:self.change_html_bool())
@@ -67,6 +69,7 @@ class GuiController(QtWidgets.QMainWindow):
         self.criteria_dict = {"tcIssueId": None}
         jira_dict = {"acctEmail": None, "jiraApiKey": None}
         self.tableView.horizontalHeader().setStyleSheet("::section{Background-color:rgb(50,50,50);}")
+        self.reqTableView.horizontalHeader().setStyleSheet("::section{Background-color:rgb(50,50,50); margin: 5px;}")
         # self.progressBar.hide()
 
         # Populate entries with what was run from previous session.
@@ -137,19 +140,32 @@ class GuiController(QtWidgets.QMainWindow):
 
         self.statusbar.showMessage("Results Saved!")
 
-    def update_table(self):
+    def update_table(self, type="comment_extraction"):
         model = pandasModel(self.results_df)   
-        self.tableView.setModel(model)
-        self.tableView.setWordWrap(True)
-        self.tableView.resizeColumnsToContents()
-        self.tableView.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
-                
-        # Resize the first column (adjust the value based on your needs)
-        self.tableView.setColumnWidth(3, 200)
-        self.tableView.setColumnWidth(5, 200)
+        if type == "comment_extraction":
+            self.tableView.setModel(model)
+            self.tableView.setWordWrap(True)
+            self.tableView.resizeColumnsToContents()
+            self.tableView.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
+                    
+            # Resize the first column (adjust the value based on your needs)
+            self.tableView.setColumnWidth(3, 200)
+            self.tableView.setColumnWidth(5, 200)
 
-        # Set word wrap for the first column
-        self.tableView.setWordWrap(True)        
+            # Set word wrap for the first column
+            self.tableView.setWordWrap(True)
+        elif type == "requirement_coloring":
+            self.reqTableView.setModel(model)
+            self.reqTableView.setWordWrap(True)
+            self.reqTableView.resizeColumnsToContents()
+            self.reqTableView.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
+                    
+            # Resize the first column (adjust the value based on your needs)
+            self.reqTableView.setColumnWidth(3, 200)
+            self.reqTableView.setColumnWidth(5, 200)
+
+            # Set word wrap for the first column
+            self.reqTableView.setWordWrap(True)  
 
     def run_comment_extraction(self, criteria_dict):
         self.statusbar.showMessage("Beginning comment extractin...")
@@ -162,16 +178,32 @@ class GuiController(QtWidgets.QMainWindow):
         self.statusbar.showMessage("Scan Complete!")
         ConfigMgr().store_criteria(criteria_dict, type="comment_extraction")        
         self.update_table()
-        self.sendJira.setEnabled(True)           
+        self.sendJira.setEnabled(True)   
+
+    def run_requirement_extraction(self, criteria_dict):
+        self.statusbar.showMessage("Beginning requirement extractin...")
+        self.progressBar.show()
+        # self.thread[1] = ThreadClass(None, 1, self.sparx)
+        # self.thread[1].start()
+
+        self.results_df = self.sparx.query_for_diagram_requirements(criteria_dict["tcDiagramId_2"])
+        self.progressBar.setValue(100)
+        self.statusbar.showMessage("Complete!")
+        ConfigMgr().store_criteria(criteria_dict, type="requirement_colors")        
+        self.update_table(type="requirement_coloring")      
 
     def populateDiagramField(self, btn):
 
         active_diagram = self.sparx.get_current_diagram_name(input=False)
         if active_diagram is not None:
             self.centralwidget.findChild(QtWidgets.QLineEdit, "tcDiagramId").setText(str(active_diagram.DiagramID))
+            self.centralwidget.findChild(QtWidgets.QLineEdit, "tcDiagramId_2").setText(str(active_diagram.DiagramID))
             self.centralwidget.findChild(QtWidgets.QLineEdit, "tcDiagramName").setText(active_diagram.name)
+            self.centralwidget.findChild(QtWidgets.QLineEdit, "tcDiagramName_2").setText(active_diagram.name)
             self.criteria_dict["tcDiagramId"] = active_diagram.DiagramID
-            self.criteria_dict["tcDiagramName"] = active_diagram.name
+            self.criteria_dict["tcDiagramId_2"] = active_diagram.DiagramID
+            self.criteria_dict["tcDiagramName"]= active_diagram.name
+            self.criteria_dict["tcDiagramName_2"] = active_diagram.name
 
     def run_scan(self, criteria_dict):
         '''Begin the scan through all tickers.'''
@@ -205,13 +237,13 @@ class GuiController(QtWidgets.QMainWindow):
     def handle_start_button(self, b):
         '''Determine what button was pressed. If it is the start scan button then populate
         the criteria dictionary and call the scanning function.'''
-
-        if b.objectName() == "extractCommentsBtn":
-            for key in list(self.criteria_dict.keys()):
+        for key in list(self.criteria_dict.keys()):
                 self.criteria_dict[key] = self.centralwidget.findChild(QtWidgets.QLineEdit, key).text()
 
+        if b.objectName() == "extractCommentsBtn":
             self.run_comment_extraction(self.criteria_dict)
-
+        elif b.objectName() == "getRequirementsBtn":
+            self.run_requirement_extraction(self.criteria_dict)
 
 class ThreadClass(QtCore.QThread):
     any_signal = QtCore.pyqtSignal(int)
